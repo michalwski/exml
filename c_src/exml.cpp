@@ -558,7 +558,8 @@ static ERL_NIF_TERM parse_next(ErlNifEnv *env, int argc,
 
   if (parser->infinite_stream) {
     result = doc.parse<parse_one()>(Parser::buffer.data() + offset);
-    element = make_xmlel(ctx, doc.impl.first_node());
+    if (!result.has_error)
+      element = make_xmlel(ctx, doc.impl.first_node());
   } else if (parser->stream_tag.empty()) {
     parseStreamOpen();
   } else if (has_stream_closing_tag(parser, offset)) {
