@@ -188,3 +188,21 @@ stream_max_child_size_test() ->
     {ok, Parser1, _} = exml_stream:parse(Parser0, <<"<stream><root>">>),
     {ok, Parser2, _} = exml_stream:parse(Parser1, <<"<a></a>">>),
     ?assertEqual({error, "child element too big"}, exml_stream:parse(Parser2, <<"<b>456</b>">>)).
+
+infinite_stream_partial_chunk_test() ->
+    {ok, Parser0} = exml_stream:new_parser([{infinite_stream, true}, {autoreset, true}]),
+	{ok, Parser1, Open} = exml_stream:parse(Parser0, <<"<open xmlns='urn:ietf:params:xml:ns:xmpp-framing' to='i.am.banana.com' version='1.0'/>">>),
+    ?assertEqual(
+       [#xmlel{name = <<"open">>,
+			   attrs = [{<<"xmlns">>, <<"urn:ietf:params:xml:ns:xmpp-framing">>},
+						{<<"to">>, <<"i.am.banana.com">>},
+						{<<"version">>, <<"1.0">>}]}],
+       Open),
+    {ok, Parser2, A} = exml_stream:parse(Parser1, <<"<a></a>">>),
+	?assertEqual([#xmlel{name = <<"a">>, attrs = []}], A),
+	{ok, Parser3, Empty0} = exml_stream:parse(Parser2, <<" ">>),
+	?assertEqual([], Empty0),
+	{ok, Parser4, Empty1} = exml_stream:parse(Parser3, <<"<b></b">>),
+	?assertEqual([], Empty1),
+	{ok, _Parser5, B} = exml_stream:parse(Parser4, <<">">>),
+	?assertEqual([#xmlel{name = <<"b">>, attrs = []}], B).
