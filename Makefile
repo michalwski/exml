@@ -2,30 +2,30 @@
 
 all: deps compile
 
-compile: rebar
-	./rebar compile
+compile: rebar3
+	./rebar3 compile
 
-deps: rebar
-	./rebar get-deps
+deps: rebar3
+	./rebar3 get-deps
 
-clean: rebar
-	./rebar clean
+clean: rebar3
+	./rebar3 clean
 
-test-deps: rebar
-	./rebar -C rebar.test.config get-deps
+test-deps: rebar3
+	./rebar3 get-deps
 
-test-compile: rebar test-deps
-	./rebar -C rebar.test.config compile
+test-compile: rebar3 test-deps
+	./rebar3 compile
 
 test: test-compile
-	./rebar -C rebar.test.config skip_deps=true eunit
+	./rebar3 eunit
 
 coverage-report: $(shell ls -1rt `find .eunit -type f -name \*.coverdata 2>/dev/null` | tail -n1)
 	erl -noshell -pa ebin deps/*/ebin -eval 'ecoveralls:travis_ci("$?"), init:stop()'
 
-rebar:
-	wget https://github.com/rebar/rebar/releases/download/2.5.1/rebar &&\
-	chmod u+x rebar
+rebar3:
+	wget https://github.com/erlang/rebar3/releases/download/3.6.1/rebar3 &&\
+	chmod u+x rebar3
 
 dialyzer/erlang.plt:
 	@mkdir -p dialyzer
